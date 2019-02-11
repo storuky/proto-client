@@ -4,22 +4,12 @@ export default {
   props: {
     id: [Number, String],
     type: String,
-    moving: {
-      type: String,
-      default: "fixed",
-      validator(value) {
-        return ["fixed", "fluid"].includes(value);
-      }
-    },
-    position: {
-      type: Object
-    },
-    size: {
-      type: Object
-    }
+    position: Object,
+    size: Object,
+    selected: Boolean
   },
   methods: {
-    translate(dim = "px") {
+    transform(dim = "px") {
       const { x: ex, y: ey } = this.position;
       const { x: vx, y: vy } = this.viewportTransform;
 
@@ -29,33 +19,46 @@ export default {
       return `translate(${x}${dim}, ${y}${dim}) scale(${this.scale})`;
     },
     dragHandler() {
-      let initial;
+      let initial = {};
 
       const handler = d3.drag();
       handler.on("start", () => {
-        const { x: ex, y: ey } = this.position;
+        this.selectedElements.forEach(({ id, position }) => {
+          const { x: ex, y: ey } = position;
 
-        initial = {
-          x: d3.event.x / this.scale - ex,
-          y: d3.event.y / this.scale - ey
-        };
+          initial[id] = {
+            x: d3.event.x / this.scale - ex,
+            y: d3.event.y / this.scale - ey
+          };
+        });
       });
       handler.on("drag", () => {
-        const position = {
-          x: d3.event.x / this.scale - initial.x,
-          y: d3.event.y / this.scale - initial.y
-        };
+        this.selectedElements.forEach(({ id }) => {
+          const position = {
+            x: d3.event.x / this.scale - initial[id].x,
+            y: d3.event.y / this.scale - initial[id].y
+          };
 
-        this.set({ position });
+          this.set({ id, position });
+        });
+      });
+      handler.on("end", () => {
+        initial = {};
       });
 
       return handler;
     },
-    set(params) {
+    set({ id, ...params }) {
       this.$store.dispatch("element/set", {
-        id: this.id,
+        id: id || this.id,
         ...params
       });
+    },
+    round(value, precision) {
+      return Math.round(value / precision) * precision;
+    },
+    findById(id) {
+      return this.$store.getters["element/findById"](id);
     }
   },
   computed: {
@@ -64,7 +67,7 @@ export default {
     },
     elementTransform() {
       return {
-        transform: this.translate()
+        transform: this.transform()
       };
     },
     elementSize() {
@@ -77,6 +80,20 @@ export default {
     scale() {
       const { scale } = this.viewportTransform;
       return scale;
+    },
+    translate() {
+      const { x, y } = this.viewportTransform;
+      return { x, y };
+    },
+    selectedIds() {
+      return this.$store.getters["element/selectedIds"];
+    },
+    selectedElements() {
+      if (this.selectedIds.includes(this.id)) {
+        return this.findById(this.selectedIds);
+      } else {
+        return this.findById([this.id]);
+      }
     }
   }
 };

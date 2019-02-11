@@ -1,12 +1,18 @@
 <template>
-  <div class="base-element" :style="{...elementTransform, ...elementSize}">
-    <div
-      v-for="corner in corners"
-      :key="corner"
-      :class="['control-point', corner]"
-      :ref="corner"
-      :style="controlPointsStyle"
-    ></div>
+  <div
+    @click="$emit('click', $event)"
+    class="base-element"
+    :style="{...elementTransform, ...elementSize}"
+  >
+    <div v-show="selected && resizable">
+      <div
+        v-for="corner in corners"
+        :key="corner"
+        :class="['control-point', corner]"
+        :ref="corner"
+        :style="controlPointsStyle"
+      ></div>
+    </div>
   </div>
 </template>
 
@@ -17,6 +23,12 @@ import * as d3 from "d3";
 export default {
   name: "BaseElement",
   extends: extend,
+  props: {
+    resizable: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       corners: ["lt", "rt", "lb", "rb"]

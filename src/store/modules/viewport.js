@@ -1,11 +1,19 @@
 const store = {
   namespaced: true,
   state: {
-    transform: { x: 0, y: 0, scale: 1 }
+    transform: { x: 0, y: 0, scale: 1 },
+    gridDistance: null,
+    gridOffset: null
   },
   mutations: {
     setTransform(state, transform) {
       state.transform = transform;
+    },
+    setGridDistance(state, gridDistance) {
+      state.gridDistance = gridDistance;
+    },
+    setGridOffset(state, gridOffset) {
+      state.gridOffset = gridOffset;
     }
   },
   actions: {
@@ -15,7 +23,9 @@ const store = {
     }
   },
   getters: {
-    transform: state => state.transform
+    transform: state => state.transform,
+    gridDistance: state => state.gridDistance,
+    gridOffset: state => state.gridOffset
   }
 };
 

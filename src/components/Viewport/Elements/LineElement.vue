@@ -15,16 +15,20 @@
       </marker>
     </defs>
     <g class="handle" :style="elementTransform" ref="handle">
-      <line v-bind="lineAttrs()"></line>
-      <line v-bind="lineAttrs({strokeWidth: 10, opacity: 0})"></line>
+      <line v-bind="lineAttrs()" @click="$emit('click')"></line>
+      <line v-bind="lineAttrs({strokeWidth: 10, opacity: 0})" @click="$emit('click', $event)"></line>
 
-      <g class="control-point" ref="dragStartHandle">
-        <rect
-          v-bind="controlPointsProps({x: 'x1', y: 'y1', opacity: settings.markerStart ? 0 : 1})"
-        ></rect>
-      </g>
-      <g class="control-point" ref="dragEndHandle">
-        <rect v-bind="controlPointsProps({x: 'x2', y: 'y2', opacity: settings.markerEnd ? 0 : 1})"></rect>
+      <g v-show="selected">
+        <g class="control-point" ref="dragStartHandle">
+          <rect
+            v-bind="controlPointsProps({x: 'x1', y: 'y1', opacity: settings.markerStart ? 0 : 1})"
+          ></rect>
+        </g>
+        <g class="control-point" ref="dragEndHandle">
+          <rect
+            v-bind="controlPointsProps({x: 'x2', y: 'y2', opacity: settings.markerEnd ? 0 : 1})"
+          ></rect>
+        </g>
       </g>
     </g>
   </svg>
@@ -39,6 +43,7 @@ export default {
   extends: extend,
   data() {
     return {
+      snapToGrid: true,
       settings: {
         x1: 0,
         y1: 0,
@@ -59,22 +64,35 @@ export default {
     d3.select(this.$refs.handle).call(this.dragHandler());
 
     d3.select(this.$refs.dragStartHandle).call(
-      this.controlPointsHandler({ x: "x1", y: "y1" })
+      this.controlPointsHandler({ xField: "x1", yField: "y1" })
     );
 
     d3.select(this.$refs.dragEndHandle).call(
-      this.controlPointsHandler({ x: "x2", y: "y2" })
+      this.controlPointsHandler({ xField: "x2", yField: "y2" })
     );
   },
   methods: {
-    controlPointsHandler({ x, y }) {
+    controlPointsHandler({ xField, yField }) {
       const handler = d3.drag();
 
       handler.on("drag", () => {
-        const dx = d3.event.x,
-          dy = d3.event.y;
+        const { x, y } = d3.event;
+        let dx, dy;
 
-        this.setSettings({ [x]: dx, [y]: dy });
+        if (this.snapToGrid) {
+          const offset = {
+            x: this.round(this.position.x, this.gridDistance) - this.position.x,
+            y: this.round(this.position.y, this.gridDistance) - this.position.y
+          };
+
+          dx = this.round(x, this.gridDistance) + offset.x;
+          dy = this.round(y, this.gridDistance) + offset.y;
+        } else {
+          dx = x;
+          dy = y;
+        }
+
+        this.setSettings({ [xField]: dx, [yField]: dy });
       });
 
       return handler;
@@ -122,6 +140,11 @@ export default {
       };
 
       return lineAttrs;
+    }
+  },
+  computed: {
+    gridDistance() {
+      return this.$store.getters["viewport/gridDistance"] / this.scale;
     }
   }
 };

@@ -33,6 +33,11 @@ export default {
       this.calcAxis();
     };
     this.calcAxis();
+
+    window.addEventListener("resize", this.calcAxis);
+    this.$once("hook:beforeDestroy", () => {
+      window.removeEventListener("resize", this.calcAxis);
+    });
   },
   methods: {
     calcAxis() {
@@ -49,22 +54,28 @@ export default {
 
       if (distance < this.minDistance) {
         this.availableDistance *= this.defaultDistance / this.minDistance;
-        distance = this.transform.scale * this.initialDistance;
+      } else if (distance > this.maxDistance) {
+        this.availableDistance /= this.defaultDistance / this.minDistance;
       }
 
-      if (distance > this.maxDistance) {
-        this.availableDistance /= this.defaultDistance / this.minDistance;
+      if (distance < this.minDistance || distance > this.maxDistance) {
         distance = this.transform.scale * this.availableDistance;
       }
+
+      this.$store.commit("viewport/setGridDistance", distance);
 
       return distance;
     },
     offset() {
       const { x, y } = this.transform;
-      return {
+      const offset = {
         x: x % this.distance,
         y: y % this.distance
       };
+
+      this.$store.commit("viewport/setGridOffset", offset);
+
+      return offset;
     }
   }
 };
