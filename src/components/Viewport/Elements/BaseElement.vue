@@ -27,10 +27,6 @@ export default {
     this.corners.forEach(corner => {
       d3.select(this.$refs[corner][0]).call(this.cornerHandler(corner));
     });
-    // d3.select(this.$refs.rb[0]).call(this.rbHandler(["r", "b"]));
-    // d3.select(this.$refs.lb[0]).call(this.lbHandler(["l", "b"]));
-    // d3.select(this.$refs.rt[0]).call(this.rtHandler(["r", "t"]));
-    // d3.select(this.$refs.lt[0]).call(this.ltHandler(["l", "t"]));
   },
   methods: {
     cornerHandler(corner) {
