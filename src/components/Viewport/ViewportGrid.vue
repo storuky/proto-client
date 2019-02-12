@@ -89,19 +89,19 @@ export default {
   top: 0;
   bottom: 0;
   pointer-events: none;
-  background: #f7f7f7;
+  background: #ffffff;
   transform-origin: 0 0;
 }
 
 .x-axis {
   height: 100%;
   position: absolute;
-  border-left: 1px solid #e7e7e7;
+  border-left: 1px solid #eff5f8;
   transform-origin: 0 0;
 }
 
 .y-axis {
-  border-top: 1px solid #e7e7e7;
+  border-top: 1px solid #eff5f8;
   position: absolute;
   width: 100%;
   transform-origin: 0 0;

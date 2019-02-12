@@ -93,7 +93,7 @@ export default {
 
 <style scoped>
 .base-element {
-  border: 1px solid gray;
+  border: 1px solid rgba(55, 53, 47, 0.29);
   background: white;
   cursor: pointer;
   position: absolute;
